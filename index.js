@@ -31,9 +31,15 @@ async function run() {
 
     const database = client.db('articsDB');
     const classesCollection = database.collection('classes');
+    const instructorsCollection = database.collection('instructors');
 
     app.get('/classes', async(req, res)=>{
         const result = await classesCollection.find().toArray();
+        res.send(result);
+    })
+
+    app.get('/instructors', async(req, res)=>{
+        const result = await instructorsCollection.find().toArray();
         res.send(result);
     })
 
