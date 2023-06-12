@@ -3,10 +3,15 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const express = require('express');
 
 const app = express();
-
-// middleware
 const cors = require('cors');
-app.use(cors());
+// middleware
+const corsOptions = {
+  origin: '*',
+  credentials: true,
+  optionSuccessStatus: 200,
+}
+app.use(cors(corsOptions));
+
 app.use(express.json());
 require('dotenv').config();
 
@@ -32,6 +37,7 @@ async function run() {
     const database = client.db('articsDB');
     const classesCollection = database.collection('classes');
     const instructorsCollection = database.collection('instructors');
+    const usersCollection = database.collection('users');
 
     app.get('/classes', async(req, res)=>{
         const result = await classesCollection.find().toArray();
@@ -41,6 +47,24 @@ async function run() {
     app.get('/instructors', async(req, res)=>{
         const result = await instructorsCollection.find().toArray();
         res.send(result);
+    })
+
+
+    // Save user email and role in database
+
+    app.put('/users/:email', async (req, res)=>{
+      const email = req.params.email;
+      const user = req.body;
+      // If a user is already saved in database
+      const query = { email: email}
+      const options = { upsert: true}   // If not, then save the user
+      const updateDoc = {
+        $set : user
+      }
+      const result = await usersCollection.updateOne(query,updateDoc, options);
+      console.log(result);
+      res.send(result);
+
     })
 
 
