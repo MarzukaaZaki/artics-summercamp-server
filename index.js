@@ -1,5 +1,5 @@
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 
 const app = express();
@@ -49,7 +49,27 @@ async function run() {
         const result = await instructorsCollection.find().toArray();
         res.send(result);
     })
+    
+    app.get('/users', async(req, res)=>{
+        const result = await usersCollection.find().toArray();
+        res.send(result);
+    })
 
+    
+    // Make Admin
+    app.patch('/users/admin/:id', async(req, res)=>{
+      const id = req.params.id;
+      console.log(id);
+      const filter = { _id: new ObjectId(id)};
+      const updateDoc = {
+        $set:{
+          role: 'admin'
+        }
+      };
+
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    })
 
     // Save user email and role in database
 
@@ -74,6 +94,7 @@ async function run() {
       const result = await classesCollection.find({email :req.params.instructorEmail}).toArray();
       res.send(result);
     })
+
 
 
     // Save a class in database
