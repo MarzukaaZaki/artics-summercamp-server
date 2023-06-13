@@ -11,6 +11,7 @@ const corsOptions = {
   optionSuccessStatus: 200,
 }
 app.use(cors(corsOptions));
+app.options("", cors(corsOptions))
 
 app.use(express.json());
 require('dotenv').config();
