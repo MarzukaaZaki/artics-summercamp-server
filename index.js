@@ -67,6 +67,22 @@ async function run() {
 
     })
 
+    // Fetch classes based on user
+    app.get('/myclasses/:email', async(req, res)=>{
+      console.log(req.params.id);
+      const result = await classesCollection.find({email :req.params.instructorEmail}).toArray();
+      res.send(result);
+    })
+
+
+    // Save a class in database
+    app.post('/classes',async(req, res)=>{
+      const classItem = req.body;
+      console.log(classItem);
+      const result = await classesCollection.insertOne(classItem);
+      res.send(result); 
+    })
+
 
 
 
