@@ -144,6 +144,21 @@ async function run() {
       res.send(result);
     })
 
+
+    // Approve Class
+    app.patch('/classes/approve/:id', async(req, res)=>{
+      const id = req.params.id;
+      console.log(id);
+      const filter = {_id: new ObjectId(id)};
+      const updateDoc = {
+        $set:{
+          status: 'approved'
+        }
+      };
+      const result = await classesCollection.updateOne(filter,updateDoc);
+      res.send(result)
+    })
+
     // Save user email and role in database
     app.put('/users/:email', async (req, res)=>{
       const email = req.params.email;
@@ -162,8 +177,8 @@ async function run() {
 
     // Fetch classes based on user
     app.get('/myclasses/:email', async(req, res)=>{
-      console.log(req.params.id);
-      const result = await classesCollection.find({email :req.params.instructorEmail}).toArray();
+      
+      const result = await classesCollection.find({instructorEmail :req.params.email}).toArray();
       res.send(result);
     })
 
