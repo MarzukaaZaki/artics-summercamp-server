@@ -63,6 +63,7 @@ async function run() {
     const classesCollection = database.collection('classes');
     const instructorsCollection = database.collection('instructors');
     const usersCollection = database.collection('users');
+    const cartCollection = database.collection('cart');
 
     app.get('/classes', async(req, res)=>{
         const result = await classesCollection.find().toArray();
@@ -173,6 +174,25 @@ async function run() {
       res.send(result)
     })
 
+
+    // Send Feedback
+    app.patch('/classes/feedback/:id', async(req, res)=>{
+
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)};
+      const body = req.body;
+      const updateDoc = {
+        $set:{
+          feedback: body.feedback
+        }
+      };
+
+      const result = await classesCollection.updateDoc(filter, updateDoc);
+      res.send(result);
+
+
+    })
+
     // Save user email and role in database
     app.put('/users/:email', async (req, res)=>{
       const email = req.params.email;
@@ -217,7 +237,12 @@ async function run() {
 
 
 
-
+    app.post('/carts', async(req, res)=>{
+      const item = req.body;
+      console.log(item);
+      const result = await cartCollection.insertOne(item);
+      res.send(result);
+    })
 
 
 
