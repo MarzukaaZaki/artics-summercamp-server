@@ -159,6 +159,20 @@ async function run() {
       res.send(result)
     })
 
+    // Deny Class
+    app.patch('/classes/deny/:id', async(req, res)=>{
+      const id = req.params.id;
+      console.log(id);
+      const filter = {_id: new ObjectId(id)};
+      const updateDoc = {
+        $set:{
+          status: 'denied'
+        }
+      };
+      const result = await classesCollection.updateOne(filter,updateDoc);
+      res.send(result)
+    })
+
     // Save user email and role in database
     app.put('/users/:email', async (req, res)=>{
       const email = req.params.email;
