@@ -2,6 +2,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 const app = express();
 const cors = require('cors');
@@ -15,7 +16,29 @@ app.use(cors(corsOptions));
 app.options("", cors(corsOptions))
 
 app.use(express.json());
-require('dotenv').config();
+
+const verifyJWT = (req, res, next) =>{
+  const authorization = req.headers.authorization;
+
+  // If user is being received
+  if(!authorization){
+    return res.status(401).send({error: true, message:'Unauthorized Access'})
+  }
+
+  // Retrieve token by user
+  const token = authorization.split(' ')[1];
+
+  // Verify token
+  jwt.verify(token, process.env.VITE_ACCESS_TOKEN_SECRET,(err, decoded)=>{
+    if(err){
+      return res.status(401).send({error: true, message:'Unauthorized Access'})
+    }
+
+    req.decoded = decoded;
+    next();
+  })
+}
+
 
 
 const port = process.env.PORT || 5000;
@@ -54,6 +77,21 @@ async function run() {
     app.get('/users', async(req, res)=>{
         const result = await usersCollection.find().toArray();
         res.send(result);
+    })
+
+    // Check if user is an admin
+    app.get('/users/admin/:email',verifyJWT, async(req, res)=>{
+      const email = req.params.email;
+
+      if(req.decoded.email!== email){
+        res.send({admin: false})
+      }
+
+
+      const query = {email: email};
+      const user = await usersCollection.findOne(query);
+      const result = {admin: user?.role==='admin'}
+      res.send(result);
     })
 
     
@@ -118,6 +156,15 @@ async function run() {
       console.log(classItem);
       const result = await classesCollection.insertOne(classItem);
       res.send(result); 
+    })
+
+
+    // Make a jwt token
+    app.post('/jwt', async(req, res)=>{
+      const user = req.body;
+      const token = jwt.sign(user, process.env.VITE_ACCESS_TOKEN_SECRET, {expiresIn: '1h'})
+
+      res.send({token});
     })
 
 
