@@ -80,17 +80,36 @@ async function run() {
     })
 
     // Check if user is an admin
-    app.get('/users/admin/:email',verifyJWT, async(req, res)=>{
+    app.get('/users/admin/:email', async(req, res)=>{
       const email = req.params.email;
 
-      if(req.decoded.email!== email){
-        res.send({admin: false})
-      }
+      // if(req.decoded.email!== email){
+      //   res.send({admin: false})
+
+      // }
 
 
       const query = {email: email};
       const user = await usersCollection.findOne(query);
       const result = {admin: user?.role==='admin'}
+      console.log(result);
+      res.send(result);
+    })
+
+    // Check if user is an admin
+    app.get('/users/instructor/:email', async(req, res)=>{
+      const email = req.params.email;
+
+      // if(req.decoded.email!== email){
+      //   res.send({admin: false})
+
+      // }
+
+
+      const query = {email: email};
+      const user = await usersCollection.findOne(query);
+      const result = {instructor: user?.role==='instructor'}
+      console.log(result);
       res.send(result);
     })
 
