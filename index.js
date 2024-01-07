@@ -6,6 +6,7 @@ require('dotenv').config();
 
 const app = express();
 const cors = require('cors');
+const stripe = require('stripe')(process.env.VITE_PAYMENT_SECRET_KEY)
 // middleware
 const corsOptions = {
   origin: '*',
@@ -64,6 +65,7 @@ async function run() {
     const instructorsCollection = database.collection('instructors');
     const usersCollection = database.collection('users');
     const cartCollection = database.collection('cart');
+    const paymentCollection = database.collection('payment');
 
     app.get('/classes', async(req, res)=>{
         const result = await classesCollection.find().toArray();
@@ -261,9 +263,28 @@ async function run() {
       const result = await cartCollection.deleteOne(query);
       res.send(result);
     })
+    // Create payment intent
+    app.post('/create-payment-intent',  async(req, res)=>{
+      const { totalPrice }= req.body;
+      const amount = totalPrice*100;
+      console.log(totalPrice, amount);
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency:'usd',
+        payment_method_types: ['card']
 
+      })
+      console.log(paymentIntent.client_secret)
+      res.send({
+        clientSecret: paymentIntent.client_secret
+      })
+    })
 
-
+    app.post('/payments', async(req, res)=>{
+      const payment = req.body;
+      const result = await paymentCollection.insertOne(payment);
+      res.send(result)
+    })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
